@@ -1,0 +1,77 @@
+<section>
+    <div class="container">
+        <table class="table mt-5">
+            <thead>
+                <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+               
+                <tr>
+                    {{#each this.product}}
+                    <td><img style="width:70px; height:70px" src="/images/{{this.product_id}}.jpg" alt=""></td>
+                    <td>{{this.product.name}}</td>
+                    <td>RS.{{this.price}}</td>
+                    <p>set:{{this.quantity}}</p>
+                
+                    <td>
+                        <button class="cart-item-count mr-3" onclick="changeQuantity('{{this._id}}', '{{this.product._id}}',-1)">-</button>
+<span id="{{this.product._id}}">{{this.quantity}}</span>
+<button class="cart-item-count ml-3" onclick="changeQuantity('{{this._id}}', '{{this.product._id}}',1)">+</button>
+
+                    </td>
+                    <td>
+                        <a class="btn btn-danger">Remove</a>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <hr>
+        <div class="float-right pr-5">
+            <h5 class="float-right mr-5 mt-4">TOTAL: RS.<span id="total">{{totalValue}}</span></h5><br>
+            <a href="/place-order" class="float-right btn btn-success mt-3" style="width:100%">Place Order</a>
+        </div>
+    </div>
+</section>
+
+<script>
+    function changeQuantity(cartId, proId, quantity, userId, count) {
+        quantity = parseInt(quantity);
+        count = parseInt(count);
+        let newQuantity = quantity + count;
+
+        $.ajax({
+            url: '/change-product-quantity',
+            data: {
+                cart: cartId,
+                product: proId,
+                count: count,
+                quantity: newQuantity,
+                userId: userId
+            },
+            method: 'POST',
+            success: function(response) {
+                if (response.removeProduct) {
+                    {{!-- alert("Product removed from the cart"); --}}
+                    location.reload();
+                } else {
+                    document.getElementById(proId).innerHTML = newQuantity;
+                    updateTotal(response.totalValue); // Update total value
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+
+    // Function to update total value
+    function updateTotal(total) {
+        document.getElementById("total").innerHTML = total;
+    }
+</script>
